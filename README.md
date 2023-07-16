@@ -9,3 +9,4 @@ https://miya-system-works.com/blog/detail/vscode-github/
 https://qiita.com/y-tsutsu/items/2ba96b16b220fb5913be
 
 https://atmarkit.itmedia.co.jp/ait/articles/2111/05/news022.html
+https://backlog.com/ja/git-tutorial/pull-request/07/

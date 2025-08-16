@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>オセロゲーム - Othello Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        
+        .game-container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f8f8;
+            border-radius: 8px;
+        }
+        
+        .score {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .current-player {
+            font-size: 20px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(8, 60px);
+            grid-template-rows: repeat(8, 60px);
+            gap: 2px;
+            background-color: #2d5016;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 0 auto;
+            width: fit-content;
+        }
+        
+        .cell {
+            width: 60px;
+            height: 60px;
+            background-color: #2d5016;
+            border: 1px solid #1a3009;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+        
+        .cell:hover {
+            background-color: #3d6026;
+        }
+        
+        .cell.valid-move {
+            background-color: #4d7036;
+        }
+        
+        .cell.valid-move:hover {
+            background-color: #5d8046;
+        }
+        
+        .piece {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid #333;
+        }
+        
+        .black {
+            background-color: #222;
+        }
+        
+        .white {
+            background-color: #fff;
+        }
+        
+        .controls {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+            transition: background-color 0.2s;
+        }
+        
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        
+        .game-over {
+            text-align: center;
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 5px;
+            color: #155724;
+        }
+        
+        .game-over h2 {
+            margin-top: 0;
+        }
+        
+        .valid-moves-hint {
+            text-align: center;
+            margin-top: 10px;
+            color: #666;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>オセロゲーム (Othello)</h1>
+        
+        <div class="game-info">
+            <div class="score">
+                <span>● 黒: <span id="blackScore">2</span></span>
+                <span style="margin-left: 20px;">○ 白: <span id="whiteScore">2</span></span>
+            </div>
+            <div class="current-player">
+                現在のプレイヤー: <span id="currentPlayer">● 黒</span>
+            </div>
+        </div>
+        
+        <div class="game-board" id="gameBoard"></div>
+        
+        <div class="valid-moves-hint" id="validMovesHint">
+            緑色のマスがクリック可能な位置です
+        </div>
+        
+        <div class="controls">
+            <button class="btn" onclick="resetGame()">新しいゲーム</button>
+            <button class="btn" onclick="showValidMoves()">有効な手を表示</button>
+        </div>
+        
+        <div id="gameOverMessage" class="game-over" style="display: none;">
+            <h2>ゲーム終了</h2>
+            <p id="winnerMessage"></p>
+        </div>
+    </div>
+
+    <script src="othello.js"></script>
+    <script>
+        let game;
+        let showingValidMoves = false;
+        
+        function initGame() {
+            game = new OthelloGame();
+            renderBoard();
+            updateGameInfo();
+        }
+        
+        function renderBoard() {
+            const board = document.getElementById('gameBoard');
+            board.innerHTML = '';
+            
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.onclick = () => makeMove(row, col);
+                    
+                    const piece = game.board[row][col];
+                    if (piece === game.BLACK) {
+                        const pieceElement = document.createElement('div');
+                        pieceElement.className = 'piece black';
+                        cell.appendChild(pieceElement);
+                    } else if (piece === game.WHITE) {
+                        const pieceElement = document.createElement('div');
+                        pieceElement.className = 'piece white';
+                        cell.appendChild(pieceElement);
+                    }
+                    
+                    // 有効な手を表示
+                    if (showingValidMoves && game.isValidMove(row, col, game.currentPlayer)) {
+                        cell.classList.add('valid-move');
+                    }
+                    
+                    board.appendChild(cell);
+                }
+            }
+        }
+        
+        function makeMove(row, col) {
+            if (game.gameOver) {
+                return;
+            }
+            
+            if (game.makeMove(row, col)) {
+                renderBoard();
+                updateGameInfo();
+                
+                if (game.gameOver) {
+                    showGameOver();
+                }
+            }
+        }
+        
+        function updateGameInfo() {
+            const { black, white } = game.countPieces();
+            document.getElementById('blackScore').textContent = black;
+            document.getElementById('whiteScore').textContent = white;
+            
+            const currentPlayerElement = document.getElementById('currentPlayer');
+            if (game.currentPlayer === game.BLACK) {
+                currentPlayerElement.textContent = '● 黒';
+            } else {
+                currentPlayerElement.textContent = '○ 白';
+            }
+        }
+        
+        function showGameOver() {
+            const winner = game.getWinner();
+            const messageElement = document.getElementById('winnerMessage');
+            const gameOverDiv = document.getElementById('gameOverMessage');
+            
+            if (winner === game.BLACK) {
+                messageElement.textContent = '黒の勝利です！';
+            } else if (winner === game.WHITE) {
+                messageElement.textContent = '白の勝利です！';
+            } else {
+                messageElement.textContent = '引き分けです！';
+            }
+            
+            const { black, white } = game.countPieces();
+            messageElement.textContent += ` (黒: ${black}, 白: ${white})`;
+            
+            gameOverDiv.style.display = 'block';
+        }
+        
+        function resetGame() {
+            document.getElementById('gameOverMessage').style.display = 'none';
+            showingValidMoves = false;
+            initGame();
+        }
+        
+        function showValidMoves() {
+            showingValidMoves = !showingValidMoves;
+            const button = event.target;
+            button.textContent = showingValidMoves ? '有効な手を隠す' : '有効な手を表示';
+            renderBoard();
+        }
+        
+        // ゲーム開始
+        initGame();
+    </script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - オセロゲーム</title>
+    <link rel="stylesheet" href="othello.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Dashboard</h1>
+            <h2>オセロゲーム</h2>
+        </header>
+        
+        <main>
+            <div class="game-container">
+                <div class="game-info">
+                    <div class="turn-display">
+                        <span id="current-player">黒</span>の番です
+                    </div>
+                    <div class="score">
+                        <div class="score-item">
+                            <span class="piece black-piece"></span>
+                            <span id="black-score">2</span>
+                        </div>
+                        <div class="score-item">
+                            <span class="piece white-piece"></span>
+                            <span id="white-score">2</span>
+                        </div>
+                    </div>
+                    <button id="reset-btn">リセット</button>
+                </div>
+                
+                <div class="board-container">
+                    <div id="game-board" class="board"></div>
+                </div>
+                
+                <div class="game-status">
+                    <div id="game-message"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="othello.js"></script>
+</body>
+</html>
